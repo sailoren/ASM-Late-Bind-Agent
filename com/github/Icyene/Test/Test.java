@@ -12,8 +12,10 @@ public class Test {
 		//we need not worry about visibility when attaching to a class
 		//that isn't using the system class loader
 
-	sayHello(5);
 	sayWorld();
+	for(int i = 0; i != 50; ++i) {
+	sayWorld();
+	}
 	
     }
 

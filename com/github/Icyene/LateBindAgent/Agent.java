@@ -144,7 +144,7 @@ public class Agent implements ClassFileTransformer {
 	    // Push values into stack, then invoke the profile function
 	    this.visitLdcInsn(_className);
 	    this.visitLdcInsn(_methodName);
-	    this.visitMethodInsn(INVOKESTATIC,
+	    this.visitMethodInsn(INVOKESTATIC, //Change to INVOKEDYNAMIC if called method is not static
 		    "com/github/Icyene/LateBindAgent/Agent$Profile",
 		    "start",
 		    "(Ljava/lang/String;Ljava/lang/String;)V"); // Start accepts
@@ -185,19 +185,11 @@ public class Agent implements ClassFileTransformer {
     public static class Profile {
 
 	public static void start(String className, String methodName) {
-	    System.out.println(new StringBuilder(className)
-		    .append('\t')
-		    .append(methodName)
-		    .append("\tstart\t")
-		    .append(System.currentTimeMillis()));
+	    System.out.println(className + "\t" + methodName + "\tstart\t" + System.currentTimeMillis());
 	}
 
 	public static void end(String className, String methodName) {
-	    System.out.println(new StringBuilder(className)
-		    .append('\t')
-		    .append(methodName)
-		    .append("\tend\t")
-		    .append(System.currentTimeMillis()));
+	    System.out.println(className + "\t" + methodName + "\tend\t" + System.currentTimeMillis());
 	}
     }
 
