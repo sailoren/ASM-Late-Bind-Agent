@@ -93,7 +93,7 @@ public class Util {
 	ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 	try {
 	    int nRead;
-	    byte[] data = new byte[16384];
+	    byte[] data = new byte[65536];
 
 	    while ((nRead = stream.read(data, 0, data.length)) != -1) {
 		buffer.write(data, 0, nRead);
