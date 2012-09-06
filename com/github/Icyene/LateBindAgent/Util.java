@@ -121,5 +121,19 @@ public class Util {
     public static byte[] getBytesFromClass(Class<?> clazz) {			
 	return getBytesFromIS(clazz.getClassLoader().getResourceAsStream( clazz.getName().replace('.', '/') + ".class"));	
     }
+    
+    /**
+     * Gets bytes from resource
+     * 
+     * @param resource
+     * The resource string
+     * @return
+     * Returns a byte[] representation of given class
+     * 
+     */
+    
+    public static byte[] getBytesFromResource(ClassLoader clazzLoader, String resource) {
+	return getBytesFromIS(clazzLoader.getResourceAsStream(resource);
+    }
 
 }
