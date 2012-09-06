@@ -133,7 +133,7 @@ public class Util {
      */
     
     public static byte[] getBytesFromResource(ClassLoader clazzLoader, String resource) {
-	return getBytesFromIS(clazzLoader.getResourceAsStream(resource);
+	return getBytesFromIS(clazzLoader.getResourceAsStream(resource));
     }
 
 }
