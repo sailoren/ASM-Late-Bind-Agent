@@ -20,17 +20,19 @@ public class ProfileMethodAdapter extends MethodAdapter {
     }
 
     public void visitCode() {
+    	//Push values into stack, then invoke the profile function
 	this.visitLdcInsn(_className);
 	this.visitLdcInsn(_methodName);
 	this.visitMethodInsn(INVOKESTATIC,
 		"com/github/Icyene/LateBindAgent/Profile",
 		"start",
-		"(Ljava/lang/String;Ljava/lang/String;)V");
+		"(Ljava/lang/String;Ljava/lang/String;)V"); //Start accepts two strings; call it so
 	super.visitCode();
     }
 
     public void visitInsn(int inst) {
 	switch (inst) {
+	//Match all return codes
 	case Opcodes.ARETURN:
 	case Opcodes.DRETURN:
 	case Opcodes.FRETURN:
@@ -50,6 +52,7 @@ public class ProfileMethodAdapter extends MethodAdapter {
 	    break;
 	}
 
+	//Visit the actual function
 	super.visitInsn(inst);
     }
 
