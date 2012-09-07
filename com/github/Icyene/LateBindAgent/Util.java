@@ -9,7 +9,6 @@ import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
-
 import com.sun.tools.attach.VirtualMachine;
 
 public class Util {
@@ -36,11 +35,9 @@ public class Util {
      * The PID of the JVM to attach to
      */
     
-    public static void attachAgentToJVM(Class<?>[] agentClasses, String JVMPid) {
+    public static void attachAgentToJVM(Class<?>[] agentClasses, Class<?>[] toAttachTo, String JVMPid) {
 
 	try {
-	
-
 	final File jarFile = File.createTempFile("agent", ".jar");
 	jarFile.deleteOnExit();
 
@@ -52,10 +49,9 @@ public class Util {
 	mainAttributes.put(new Attributes.Name("Can-Retransform-Classes"),
 		"true");
 	mainAttributes.put(new Attributes.Name("Can-Redefine-Classes"), "true");
-
+	
 	final JarOutputStream jos = new JarOutputStream(new FileOutputStream(
 		jarFile), manifest);
-	
 	
 	for(Class<?> clazz: agentClasses) {  	    
 		final JarEntry agent = new JarEntry(clazz.getName().replace('.',

@@ -1,7 +1,5 @@
 package com.github.Icyene.LateBindAgent;
 
-import static org.objectweb.asm.Opcodes.INVOKESTATIC;
-
 import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
@@ -14,14 +12,13 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodAdapter;
 import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
 
 import com.github.Icyene.Test.Test;
 
 /**
  * Primary class used by tests to allow for method profiling information. Client
- * code will interact with this method only. * This class is NOT Thread safe.
- * But can be made so if required. This code is licensed under the WTFPL. Please
+ * code will interact with this method only. This class is NOT Thread safe. But
+ * can be made so if required. This code is licensed under the WTFPL. Please
  * credit if used; it took me 4 hours to develop.
  * 
  * @author Icyene
@@ -31,21 +28,23 @@ public class Agent implements ClassFileTransformer {
     private static Instrumentation instrumentation = null;
     private static Agent transformer;
 
-    public static void agentmain(String s, Instrumentation i) {
+    public static void agentmain(String string, Instrumentation instrument) {
 
 	System.out.println("Agent loaded!");
 
 	// initialization code:
 	transformer = new Agent();
-	instrumentation = i;
+	instrumentation = instrument;
 	instrumentation.addTransformer(transformer);
 	// to instrument, first revert all added bytecode:
 	// call retransformClasses() on all modifiable classes...
+
 	try {
+
 	    instrumentation.redefineClasses(new ClassDefinition(Test.class,
 		    Util.getBytesFromClass(Test.class)));
-	} catch (Exception e) {
-	    e.printStackTrace();
+
+	} catch (Exception e) {	 
 	    System.out.println("Failed to redefine class!");
 	}
 
@@ -70,17 +69,11 @@ public class Agent implements ClassFileTransformer {
 	// classloader we will nto be able to see it and crash if we try to
 	// profile it.
 	if (loader != ClassLoader.getSystemClassLoader()) {
-	    System.err
-		    .println(className
-			    + " is not using the system loader, and so cannot be loaded!");
 	    return classfileBuffer;
 	}
 
 	// Don't profile yourself, otherwise you'll stackoverflow.
 	if (className.startsWith("com/github/Icyene/LateBindAgent")) {
-	    System.err
-		    .println(className
-			    + " is part of profiling classes. No StackOverflow for you!");
 	    return classfileBuffer;
 	}
 
@@ -144,7 +137,7 @@ public class Agent implements ClassFileTransformer {
 	    // Push values into stack, then invoke the profile function
 	    this.visitLdcInsn(_className);
 	    this.visitLdcInsn(_methodName);
-	    this.visitMethodInsn(INVOKESTATIC, //Change to INVOKEDYNAMIC if called method is not static
+	    this.visitMethodInsn(184, //184 is the opcode for INVOKESTATIC
 		    "com/github/Icyene/LateBindAgent/Agent$Profile",
 		    "start",
 		    "(Ljava/lang/String;Ljava/lang/String;)V"); // Start accepts
@@ -155,17 +148,17 @@ public class Agent implements ClassFileTransformer {
 
 	public void visitInsn(int inst) {
 	    switch (inst) {
-	    // Match all return codes
-	    case Opcodes.ARETURN:
-	    case Opcodes.DRETURN:
-	    case Opcodes.FRETURN:
-	    case Opcodes.IRETURN:
-	    case Opcodes.LRETURN:
-	    case Opcodes.RETURN:
-	    case Opcodes.ATHROW:
+	    // Match all return codes. Basically what is in OPCODES
+	    case 177:
+	    case 176:
+	    case 175:
+	    case 174:
+	    case 173:
+	    case 172:	    
+	    case 191:
 		this.visitLdcInsn(_className);
 		this.visitLdcInsn(_methodName);
-		this.visitMethodInsn(INVOKESTATIC,
+		this.visitMethodInsn(184,
 			"com/github/Icyene/LateBindAgent/Agent$Profile",
 			"end",
 			"(Ljava/lang/String;Ljava/lang/String;)V");
@@ -185,11 +178,13 @@ public class Agent implements ClassFileTransformer {
     public static class Profile {
 
 	public static void start(String className, String methodName) {
-	    System.out.println(className + "\t" + methodName + "\tstart\t" + System.currentTimeMillis());
+	    System.out.println(className + "\t" + methodName + "\tstart\t"
+		    + System.currentTimeMillis());
 	}
 
 	public static void end(String className, String methodName) {
-	    System.out.println(className + "\t" + methodName + "\tend\t" + System.currentTimeMillis());
+	    System.out.println(className + "\t" + methodName + "\tend\t"
+		    + System.currentTimeMillis());
 	}
     }
 

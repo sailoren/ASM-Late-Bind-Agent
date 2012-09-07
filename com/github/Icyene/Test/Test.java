@@ -7,7 +7,7 @@ public class Test {
 
     public static void main(String[] args) {
 
-	Util.attachAgentToJVM(new Class<?>[] {Agent.class, Util.class}, Util.getPidFromRuntimeMBean()); 
+	Util.attachAgentToJVM(new Class<?>[] {Agent.class, Util.class}, new Class<?>[] {Test.class}, Util.getPidFromRuntimeMBean()); 
 		//Because we are creating the agent jar with all necessary files,
 		//we need not worry about visibility when attaching to a class
 		//that isn't using the system class loader
