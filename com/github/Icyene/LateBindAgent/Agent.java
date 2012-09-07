@@ -14,6 +14,7 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodAdapter;
 import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 
 import com.github.Icyene.Test.Test;
 
@@ -151,14 +152,14 @@ public class Agent implements ClassFileTransformer {
 
 	public void visitInsn(int inst) {
 	    switch (inst) {
-	    // Match all return codes. Basically what is in OPCODES
-	    case 177:
-	    case 176:
-	    case 175:
-	    case 174:
-	    case 173:
-	    case 172:	    
-	    case 191:
+	    // Match all return codes
+	    case Opcodes.ARETURN:
+	    case Opcodes.DRETURN:
+	    case Opcodes.FRETURN:
+	    case Opcodes.IRETURN:
+	    case Opcodes.LRETURN:
+	    case Opcodes.RETURN:
+	    case Opcodes.ATHROW:
 		this.visitLdcInsn(_className);
 		this.visitLdcInsn(_methodName);
 		this.visitMethodInsn(INVOKESTATIC,
