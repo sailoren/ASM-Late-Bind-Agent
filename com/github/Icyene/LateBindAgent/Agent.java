@@ -1,5 +1,7 @@
 package com.github.Icyene.LateBindAgent;
 
+import static org.objectweb.asm.Opcodes.INVOKESTATIC;
+
 import java.lang.instrument.ClassDefinition;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
@@ -137,7 +139,8 @@ public class Agent implements ClassFileTransformer {
 	    // Push values into stack, then invoke the profile function
 	    this.visitLdcInsn(_className);
 	    this.visitLdcInsn(_methodName);
-	    this.visitMethodInsn(184, //184 is the opcode for INVOKESTATIC
+	    this.visitMethodInsn(INVOKESTATIC, // Change to INVOKEDYNAMIC if
+					       // called method is not static
 		    "com/github/Icyene/LateBindAgent/Agent$Profile",
 		    "start",
 		    "(Ljava/lang/String;Ljava/lang/String;)V"); // Start accepts
@@ -158,7 +161,7 @@ public class Agent implements ClassFileTransformer {
 	    case 191:
 		this.visitLdcInsn(_className);
 		this.visitLdcInsn(_methodName);
-		this.visitMethodInsn(184,
+		this.visitMethodInsn(INVOKESTATIC,
 			"com/github/Icyene/LateBindAgent/Agent$Profile",
 			"end",
 			"(Ljava/lang/String;Ljava/lang/String;)V");
