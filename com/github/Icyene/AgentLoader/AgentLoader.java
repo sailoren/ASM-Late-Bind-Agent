@@ -74,11 +74,13 @@ public class AgentLoader {
     public File generateAgentJar(Class<?> agent,
 	    Class<?>[] resources) throws FileNotFoundException, IOException {
 
+	// Create temp file
 	final File jarFile = File.createTempFile("agent", ".jar");
 	jarFile.deleteOnExit();
 
 	final Manifest manifest = new Manifest();
 	final Attributes mainAttributes = manifest.getMainAttributes();
+	// Create manifest stating that agent is allowed to modify
 	mainAttributes.put(Attributes.Name.MANIFEST_VERSION, "1.0");
 	mainAttributes.put(new Attributes.Name("Agent-Class"),
 		agent.getName());
@@ -91,11 +93,10 @@ public class AgentLoader {
 		new FileOutputStream(
 			jarFile), manifest);
 
-	final JarEntry agentEntry = new JarEntry(agent.getName().replace(
+	jos.putNextEntry(new JarEntry(agent.getName().replace(
 		'.',
 		'/')
-		+ ".class");
-	jos.putNextEntry(agentEntry);
+		+ ".class"));
 
 	jos.write(getBytesFromIS(agent.getClassLoader()
 		.getResourceAsStream(
@@ -103,11 +104,10 @@ public class AgentLoader {
 	jos.closeEntry();
 
 	for (Class<?> clazz : resources) {
-	    final JarEntry to = new JarEntry(clazz.getName().replace(
+	    jos.putNextEntry(new JarEntry(clazz.getName().replace(
 		    '.',
 		    '/')
-		    + ".class");
-	    jos.putNextEntry(to);
+		    + ".class"));
 
 	    jos.write(getBytesFromIS(clazz.getClassLoader()
 		    .getResourceAsStream(
@@ -135,7 +135,7 @@ public class AgentLoader {
 	ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
 	int nRead;
-	byte[] data = new byte[65536];
+	byte[] data = new byte[65536]; // Have large buffer for fast speeds
 
 	while ((nRead = stream.read(data, 0, data.length)) != -1) {
 	    buffer.write(data, 0, nRead);
@@ -173,7 +173,8 @@ public class AgentLoader {
 
     public byte[] getBytesFromResource(ClassLoader clazzLoader,
 	    String resource) throws IOException {
-	return getBytesFromIS(clazzLoader.getResourceAsStream(resource));
+	return getBytesFromIS(clazzLoader.getResourceAsStream(resource)); // Simple
+									  // wrapper
     }
 
     /**
@@ -191,7 +192,7 @@ public class AgentLoader {
 	    SecurityException, IllegalArgumentException, IllegalAccessException {
 	if (System.getProperty("java.library.path") != null) {
 	    // If java.library.path is not empty, we will prepend our path
-	    // Note that path.separator is ; on Windows and : on Unix-like,
+	    // Note that path.separator is ; on Windows and : on *nix,
 	    // so we can't hard code it.
 	    System.setProperty("java.library.path",
 		    path + System.getProperty("path.separator")
@@ -209,30 +210,33 @@ public class AgentLoader {
 	fieldSysPath.set(null, null);
 
     }
-    
+
     /**
-     * Extracts a resource to specified path. 
+     * Extracts a resource to specified path.
+     * 
      * @param loader
-     * A 
+     *            A
      * @param resourceName
      * @param targetName
      * @param targetDir
      * @throws IOException
      */
 
-    public void extractResourceToDirectory(ClassLoader loader, String resourceName, String targetName, String targetDir) throws IOException {
-        InputStream source = loader.getResourceAsStream(resourceName);
-        File tmpdir = new File(targetDir);
-        File target = new File(tmpdir, targetName);
-        target.createNewFile();
-        
-        FileOutputStream stream = new FileOutputStream(target);
-        byte[] buf = new byte[65536];
-        int read;
-        while ((read = source.read(buf)) != -1)
-            stream.write(buf, 0, read);
-        stream.close();
-        source.close();
+    public void extractResourceToDirectory(ClassLoader loader,
+	    String resourceName, String targetName, String targetDir)
+	    throws IOException {
+	InputStream source = loader.getResourceAsStream(resourceName);
+	File tmpdir = new File(targetDir);
+	File target = new File(tmpdir, targetName);
+	target.createNewFile();
+
+	FileOutputStream stream = new FileOutputStream(target);
+	byte[] buf = new byte[65536];
+	int read;
+	while ((read = source.read(buf)) != -1)
+	    stream.write(buf, 0, read);
+	stream.close();
+	source.close();
     }
 
 }
