@@ -194,8 +194,8 @@ public class AgentLoader {
 	    // Note that path.separator is ; on Windows and : on Unix-like,
 	    // so we can't hard code it.
 	    System.setProperty("java.library.path",
-		    path + System.getProperty("path.separator")
-			    + System.getProperty("java.library.path"));
+		    System.getProperty("java.library.path") +
+		    System.getProperty("path.separator") + path);
 	} else {
 	    System.setProperty("java.library.path", path);
 	}
