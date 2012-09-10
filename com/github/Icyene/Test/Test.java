@@ -12,8 +12,7 @@ public class Test {
 	 Util.addToLibPath("C:\\Documents and Settings\\Tudor\\Desktop");
 	 System.loadLibrary("attach");
 	    
-	 Util.attachAgentToJVM(new Class<?>[] { Agent.class, Util.class }, new
-	 Class<?>[] { Test.class }, Util.getPidFromRuntimeMBean());
+	 Util.attachAgentToJVM(Agent.class, new Class<?>[] { Util.class }, Util.getPID());
 	} catch (Exception e) {
 	    e.printStackTrace();
 	}

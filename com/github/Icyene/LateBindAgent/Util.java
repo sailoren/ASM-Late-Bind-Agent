@@ -26,27 +26,29 @@ public class Util {
      * @throws Exception
      */
 
-    public static String getPidFromRuntimeMBean() {
+    public static String getPID() {
 	String jvm = ManagementFactory.getRuntimeMXBean().getName();
 	String pid = jvm.substring(0, jvm.indexOf('@'));
 	return pid;
     }
 
     /**
-     * Attaches given agent classes to JVM
+     * Loads an agent into a JVM.
      * 
-     * @param agentClasses
-     *            A Class<?>[] of classes to be included in agent
+     * @param agentClass
+     *            The main class of the agent
+     * @param resources
+     *            All resources to be shipped with the agent
      * @param JVMPid
-     *            The PID of the JVM to attach to
+     *            The ID to attach to
      * @throws IOException
      * @throws AttachNotSupportedException
-     * @throws AgentInitializationException
      * @throws AgentLoadException
+     * @throws AgentInitializationException
      */
 
-    public static void attachAgentToJVM(Class<?>[] agentClasses,
-	    Class<?>[] toAttachTo, String JVMPid) throws IOException,
+    public static void attachAgentToJVM(Class<?> agentClass,
+	    Class<?>[] resources, String JVMPid) throws IOException,
 	    AttachNotSupportedException, AgentLoadException,
 	    AgentInitializationException {
 
@@ -57,7 +59,7 @@ public class Util {
 	final Attributes mainAttributes = manifest.getMainAttributes();
 	mainAttributes.put(Attributes.Name.MANIFEST_VERSION, "1.0");
 	mainAttributes.put(new Attributes.Name("Agent-Class"),
-		Agent.class.getName());
+		agentClass.getName());
 	mainAttributes.put(new Attributes.Name("Can-Retransform-Classes"),
 		"true");
 	mainAttributes.put(new Attributes.Name("Can-Redefine-Classes"),
@@ -67,12 +69,23 @@ public class Util {
 		new FileOutputStream(
 			jarFile), manifest);
 
-	for (Class<?> clazz : agentClasses) {
-	    final JarEntry agent = new JarEntry(clazz.getName().replace(
+	final JarEntry agent = new JarEntry(agentClass.getName().replace(
+		'.',
+		'/')
+		+ ".class");
+	jos.putNextEntry(agent);
+
+	jos.write(getBytesFromIS(agentClass.getClassLoader()
+		.getResourceAsStream(
+			agentClass.getName().replace('.', '/') + ".class")));
+	jos.closeEntry();
+
+	for (Class<?> clazz : resources) {
+	    final JarEntry to = new JarEntry(clazz.getName().replace(
 		    '.',
 		    '/')
 		    + ".class");
-	    jos.putNextEntry(agent);
+	    jos.putNextEntry(to);
 
 	    jos.write(getBytesFromIS(clazz.getClassLoader()
 		    .getResourceAsStream(
