@@ -13,6 +13,9 @@ Dependencies:
 -------------
 ASM. Needed for reinstrumentation. http://asm.ow2.org/
 
+AgentLoader JavaDocs
+--------------------
+https://dl.dropbox.com/u/67341745/AgentUtils/index.html
 License:
 --------
 The agent, loader, test classes and everything else included in this repository are licensed under the WTFPL. Have fun.
