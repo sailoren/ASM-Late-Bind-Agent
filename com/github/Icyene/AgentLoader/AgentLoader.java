@@ -1,7 +1,8 @@
-package com.github.Icyene.LateBindAgent;
+package com.github.Icyene.AgentLoader;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,16 +18,16 @@ import com.sun.tools.attach.AgentLoadException;
 import com.sun.tools.attach.AttachNotSupportedException;
 import com.sun.tools.attach.VirtualMachine;
 
-public class Util {
+public class AgentLoader {
 
     /**
-     * Gets the current JVM PID
+     * Gets the current JVM PID.
      * 
-     * @return Returns the PID
+     * @return Returns the PID.
      * @throws Exception
      */
 
-    public static String getPID() {
+    public String getCurrentPID() {
 	String jvm = ManagementFactory.getRuntimeMXBean().getName();
 	String pid = jvm.substring(0, jvm.indexOf('@'));
 	return pid;
@@ -35,22 +36,43 @@ public class Util {
     /**
      * Loads an agent into a JVM.
      * 
-     * @param agentClass
-     *            The main class of the agent
+     * @param agent
+     *            The main agent class.
      * @param resources
-     *            All resources to be shipped with the agent
+     *            Array of classes to be included with agent.
      * @param JVMPid
-     *            The ID to attach to
+     *            The ID of the target JVM.
      * @throws IOException
      * @throws AttachNotSupportedException
      * @throws AgentLoadException
      * @throws AgentInitializationException
      */
 
-    public static void attachAgentToJVM(Class<?> agentClass,
+    public void attachAgentToJVM(Class<?> agent,
 	    Class<?>[] resources, String JVMPid) throws IOException,
 	    AttachNotSupportedException, AgentLoadException,
 	    AgentInitializationException {
+
+	VirtualMachine vm = VirtualMachine.attach(JVMPid);
+	vm.loadAgent(generateAgentJar(agent, resources).getAbsolutePath());
+	vm.detach();
+
+    }
+
+    /**
+     * Generates a temporary agent file. Used by attachAgentToJVM.
+     * 
+     * @param agent
+     *            The main agent class.
+     * @param resources
+     *            Array of classes to be included with agent.
+     * @return Returns a temporary jar file with the specified classes included.
+     * @throws FileNotFoundException
+     * @throws IOException
+     */
+
+    public File generateAgentJar(Class<?> agent,
+	    Class<?>[] resources) throws FileNotFoundException, IOException {
 
 	final File jarFile = File.createTempFile("agent", ".jar");
 	jarFile.deleteOnExit();
@@ -59,7 +81,7 @@ public class Util {
 	final Attributes mainAttributes = manifest.getMainAttributes();
 	mainAttributes.put(Attributes.Name.MANIFEST_VERSION, "1.0");
 	mainAttributes.put(new Attributes.Name("Agent-Class"),
-		agentClass.getName());
+		agent.getName());
 	mainAttributes.put(new Attributes.Name("Can-Retransform-Classes"),
 		"true");
 	mainAttributes.put(new Attributes.Name("Can-Redefine-Classes"),
@@ -69,15 +91,15 @@ public class Util {
 		new FileOutputStream(
 			jarFile), manifest);
 
-	final JarEntry agent = new JarEntry(agentClass.getName().replace(
+	final JarEntry agentEntry = new JarEntry(agent.getName().replace(
 		'.',
 		'/')
 		+ ".class");
-	jos.putNextEntry(agent);
+	jos.putNextEntry(agentEntry);
 
-	jos.write(getBytesFromIS(agentClass.getClassLoader()
+	jos.write(getBytesFromIS(agent.getClassLoader()
 		.getResourceAsStream(
-			agentClass.getName().replace('.', '/') + ".class")));
+			agent.getName().replace('.', '/') + ".class")));
 	jos.closeEntry();
 
 	for (Class<?> clazz : resources) {
@@ -94,22 +116,21 @@ public class Util {
 	}
 
 	jos.close();
-	VirtualMachine vm = VirtualMachine.attach(JVMPid);
-	vm.loadAgent(jarFile.getAbsolutePath());
-	vm.detach();
+
+	return jarFile;
 
     }
 
     /**
-     * Gets bytes from InputStream
+     * Gets bytes from InputStream.
      * 
      * @param stream
-     *            The InputStream
-     * @return Returns a byte[] representation of given stream
+     *            The InputStream.
+     * @return Returns a byte[] representation of given stream.
      * @throws IOException
      */
 
-    public static byte[] getBytesFromIS(InputStream stream) throws IOException {
+    public byte[] getBytesFromIS(InputStream stream) throws IOException {
 
 	ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
@@ -130,12 +151,12 @@ public class Util {
      * Gets bytes from class
      * 
      * @param clazz
-     *            The class
-     * @return Returns a byte[] representation of given class
+     *            The class.
+     * @return Returns a byte[] representation of given class.
      * @throws IOException
      */
 
-    public static byte[] getBytesFromClass(Class<?> clazz) throws IOException {
+    public byte[] getBytesFromClass(Class<?> clazz) throws IOException {
 	return getBytesFromIS(clazz.getClassLoader().getResourceAsStream(
 		clazz.getName().replace('.', '/') + ".class"));
     }
@@ -144,19 +165,19 @@ public class Util {
      * Gets bytes from resource
      * 
      * @param resource
-     *            The resource string
-     * @return Returns a byte[] representation of given class
+     *            The resource string.
+     * @return Returns a byte[] representation of given resource.
      * @throws IOException
      * 
      */
 
-    public static byte[] getBytesFromResource(ClassLoader clazzLoader,
+    public byte[] getBytesFromResource(ClassLoader clazzLoader,
 	    String resource) throws IOException {
 	return getBytesFromIS(clazzLoader.getResourceAsStream(resource));
     }
 
     /**
-     * Adds a path to the current path
+     * Adds a a path to the current java.library.path.
      * 
      * @param path
      *            The path.
@@ -166,7 +187,7 @@ public class Util {
      * @throws IllegalArgumentException
      */
 
-    public static void addToLibPath(String path) throws NoSuchFieldException,
+    public void addToLibPath(String path) throws NoSuchFieldException,
 	    SecurityException, IllegalArgumentException, IllegalAccessException {
 	if (System.getProperty("java.library.path") != null) {
 	    // If java.library.path is not empty, we will prepend our path

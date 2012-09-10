@@ -1,28 +1,30 @@
 package com.github.Icyene.Test;
 
-import com.github.Icyene.LateBindAgent.Agent;
-import com.github.Icyene.LateBindAgent.Util;
+import com.github.Icyene.AgentLoader.AgentLoader;
 
 public class Test {
 
     public static void main(String[] args) {
 
 	try {
-	    
-	 Util.addToLibPath("C:\\Documents and Settings\\Tudor\\Desktop");
-	 System.loadLibrary("attach");
-	    
-	 Util.attachAgentToJVM(Agent.class, new Class<?>[] { Util.class }, Util.getPID());
+
+	    AgentLoader agent = new AgentLoader();
+
+	    agent.addToLibPath("C:\\Documents and Settings\\Tudor\\Desktop");
+	    System.loadLibrary("attach");
+
+	    agent.attachAgentToJVM(Agent.class,
+		    new Class<?>[] { AgentLoader.class }, agent.getCurrentPID());
 	} catch (Exception e) {
 	    e.printStackTrace();
 	}
-	
+
 	test();
-	
+
     }
-    
+
     public static void test() {
-	
+
     }
 
 }

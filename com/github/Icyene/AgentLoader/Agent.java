@@ -1,4 +1,4 @@
-package com.github.Icyene.LateBindAgent;
+package com.github.Icyene.AgentLoader;
 
 import static org.objectweb.asm.Opcodes.INVOKESTATIC;
 
@@ -30,6 +30,7 @@ public class Agent implements ClassFileTransformer {
 
     private static Instrumentation instrumentation = null;
     private static Agent transformer;
+    private static AgentLoader agent;
 
     public static void agentmain(String string, Instrumentation instrument) {
 
@@ -41,11 +42,13 @@ public class Agent implements ClassFileTransformer {
 	instrumentation.addTransformer(transformer);
 	// to instrument, first revert all added bytecode:
 	// call retransformClasses() on all modifiable classes...
+	
+	agent = new AgentLoader();
 
 	try {
 
 	    instrumentation.redefineClasses(new ClassDefinition(Test.class,
-		    Util.getBytesFromClass(Test.class)));
+		    agent.getBytesFromClass(Test.class)));
 
 	} catch (Exception e) {	 
 	    System.out.println("Failed to redefine class!");
@@ -76,7 +79,7 @@ public class Agent implements ClassFileTransformer {
 	}
 
 	// Don't profile yourself, otherwise you'll stackoverflow.
-	if (className.startsWith("com/github/Icyene/LateBindAgent")) {
+	if (className.startsWith("com/github/Icyene/AgentLoader")) {
 	    return classfileBuffer;
 	}
 
@@ -142,7 +145,7 @@ public class Agent implements ClassFileTransformer {
 	    this.visitLdcInsn(_methodName);
 	    this.visitMethodInsn(INVOKESTATIC, // Change to INVOKEDYNAMIC if
 					       // called method is not static
-		    "com/github/Icyene/LateBindAgent/Agent$Profile",
+		    "com/github/Icyene/AgentLoader/Agent$Profile",
 		    "start",
 		    "(Ljava/lang/String;Ljava/lang/String;)V"); // Start accepts
 								// two strings;
@@ -163,7 +166,7 @@ public class Agent implements ClassFileTransformer {
 		this.visitLdcInsn(_className);
 		this.visitLdcInsn(_methodName);
 		this.visitMethodInsn(INVOKESTATIC,
-			"com/github/Icyene/LateBindAgent/Agent$Profile",
+			"com/github/Icyene/AgentLoader/Agent$Profile",
 			"end",
 			"(Ljava/lang/String;Ljava/lang/String;)V");
 
