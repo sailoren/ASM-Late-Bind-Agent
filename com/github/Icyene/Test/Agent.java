@@ -79,7 +79,7 @@ public class Agent implements ClassFileTransformer {
 	}
 
 	// Don't profile yourself, otherwise you'll stackoverflow.
-	if (className.startsWith("com/github/Icyene/AgentLoader")) {
+	if (className.startsWith("com/github/Icyene/Test")) {
 	    return classfileBuffer;
 	}
 
@@ -145,7 +145,7 @@ public class Agent implements ClassFileTransformer {
 	    this.visitLdcInsn(_methodName);
 	    this.visitMethodInsn(INVOKESTATIC, // Change to INVOKEDYNAMIC if
 					       // called method is not static
-		    "com/github/Icyene/AgentLoader/Agent$Profile",
+		    "com/github/Icyene/Test/Agent$Profile",
 		    "start",
 		    "(Ljava/lang/String;Ljava/lang/String;)V"); // Start accepts
 								// two strings;
@@ -166,7 +166,7 @@ public class Agent implements ClassFileTransformer {
 		this.visitLdcInsn(_className);
 		this.visitLdcInsn(_methodName);
 		this.visitMethodInsn(INVOKESTATIC,
-			"com/github/Icyene/AgentLoader/Agent$Profile",
+			"com/github/Icyene/Test/Agent$Profile",
 			"end",
 			"(Ljava/lang/String;Ljava/lang/String;)V");
 
