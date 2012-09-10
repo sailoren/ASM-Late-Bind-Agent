@@ -209,5 +209,30 @@ public class AgentLoader {
 	fieldSysPath.set(null, null);
 
     }
+    
+    /**
+     * Extracts a resource to specified path. 
+     * @param loader
+     * A 
+     * @param resourceName
+     * @param targetName
+     * @param targetDir
+     * @throws IOException
+     */
+
+    public void extractResourceToDirectory(ClassLoader loader, String resourceName, String targetName, String targetDir) throws IOException {
+        InputStream source = loader.getResourceAsStream(resourceName);
+        File tmpdir = new File(targetDir);
+        File target = new File(tmpdir, targetName);
+        target.createNewFile();
+        
+        FileOutputStream stream = new FileOutputStream(target);
+        byte[] buf = new byte[65536];
+        int read;
+        while ((read = source.read(buf)) != -1)
+            stream.write(buf, 0, read);
+        stream.close();
+        source.close();
+    }
 
 }
