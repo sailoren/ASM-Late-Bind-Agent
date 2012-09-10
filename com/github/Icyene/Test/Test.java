@@ -11,7 +11,7 @@ public class Test {
 	    AgentLoader agent = new AgentLoader();
 
 	    agent.addToLibPath("C:\\Documents and Settings\\Tudor\\Desktop");
-	    System.loadLibrary("attach");
+	    agent.loadAgentLibrary();
 
 	    agent.attachAgentToJVM(Agent.class,
 		    new Class<?>[] { AgentLoader.class }, agent.getCurrentPID());
