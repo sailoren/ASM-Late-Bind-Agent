@@ -1,0 +1,2 @@
+#!/bin/sh
+./runclass com.github.Icyene.$1

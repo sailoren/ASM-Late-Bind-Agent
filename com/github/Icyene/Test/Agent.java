@@ -79,8 +79,9 @@ public class Agent implements ClassFileTransformer {
 	}
 
 	// Don't profile yourself, otherwise you'll stackoverflow.
+
 	if (className.startsWith("com/github/Icyene/Test/Agen")) {
-	    return classfileBuffer;
+	   return classfileBuffer;
 	}
 
 	byte[] result = classfileBuffer;

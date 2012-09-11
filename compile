@@ -1,0 +1,2 @@
+#!/bin/sh
+javac -cp /usr/lib/jvm/java-6-openjdk/lib/tools.jar `find . -name *java`
